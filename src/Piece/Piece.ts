@@ -9,6 +9,7 @@ export class Piece {
   private otherPieces: Piece[] = [];
   // private canCastle: null | boolean = null;
   private pieceValue: number = 0;
+  public moveType: null | "straigt" | "diagonal"  | "pawn" | "L" = null;
 
   constructor(
     private piece: PiecesEnum,
@@ -18,6 +19,10 @@ export class Piece {
   ) {
     // if (this.piece === "K" || this.piece === "k" || this.piece === "R" || this.piece === "r") this.canCastle = true;
     this.pieceValue = pieceValues[this.piece.toLowerCase() as "p" | "r" | "n" | "b" | "q"];
+    if (this.piece.toLowerCase() === "r") this.moveType = "straigt";
+    else if (this.piece.toLowerCase() === "b") this.moveType = "diagonal";
+    else if (this.piece.toLowerCase() === "n") this.moveType = "L";
+    else if (this.piece.toLowerCase() === "p") this.moveType = "pawn";
   }
 
   public setOtherPieces(pieces: Piece[]): void {
@@ -49,20 +54,6 @@ export class Piece {
 
   public get moves(): Move[] | "check" | "checkmate" {
     const moves: Move[] = [];
-
-    const whiteCheck = this.checkWhiteCheck();
-    // console.log(whiteCheck);
-    // process.exit();
-    if (this.color === "w" && this.type === "K" && whiteCheck !== -1 && whiteCheck.inCheck) {
-      this.addToMovesK(moves, whiteCheck.canMove);
-      return moves;
-    } else if (this.color === "w" && this.type !== "K" && whiteCheck !== -1 && whiteCheck.inCheck)
-      return []
-    // if (this.type !== )
-    // console.log(this.checkWhiteCheck());
-    // if (this.piece.toLowerCase() === PiecesEnum.k) {
-    //   const check = 
-    // } 
 
     if (
       this.piece === PiecesEnum.P ||
@@ -264,12 +255,11 @@ export class Piece {
   private addToMovesK(moves: Move[], canMoveTo?: [number, number][]) {
     const currentPos = this.pieceLocation;
     const cords = posToCords(currentPos);
-    if (canMoveTo !== undefined) console.log(canMoveTo);
     if (canMoveTo !== undefined) {
       for (const cords of canMoveTo) {
         const move = cordsToPos(cords);
         let take = false;
-        // if (this.otherPieces.filter(p => p.color === "b" && p.location === move)) take = true;
+        if (this.otherPieces.find(p => p.color !== this.color && p.location === move)) take = true;
         moves.push({ move, take });
       }
     } else {
@@ -354,76 +344,4 @@ export class Piece {
     this.addToMovesN(moves);
   }
 
-  private checkWhiteCheck() {
-    const moves: Move[] = [];
-    const whiteKing = clone(this.piece === "K" ? this : this.otherPieces.find(v => v.type === "K") as Piece);
-    const whiteLocAsCords = posToCords(whiteKing.location);
-    const whitePieces = this.otherPieces.filter(p => p.color === "w");
-
-    this.getAllMoves(moves);
-
-    let inCheck = false;
-
-    const take = moves.filter(m => m.take);
-
-    if (take.length < 1) return -1;
-    else {
-
-      inCheck = true;
-      const otherKingSpaces: [number, number][] = [
-        [1, -1],
-        [1, 0],
-        [1, 1],
-        [0, 1],
-        [-1, 1],
-        [-1, 0],
-        [-1, -1],
-        [0, -1],
-      ];
-
-      const canMove: [number, number][] = [];
-
-      for (let i = 0; i < otherKingSpaces.length; i++) {
-        const tempMoves: Move[] = [];
-        const cur = otherKingSpaces[i];
-        const newCords: [number, number] = [cur[0] + whiteLocAsCords[1], 8 - Math.abs(cur[1] + whiteLocAsCords[0])];
-        if (newCords[1] === 0) continue;
-
-        const position = cordsToPos(newCords);
-
-        const tp = new Piece(PiecesEnum.K, position, this.board, false);
-        tp.getAllMoves(moves);
-        const tpmTakes = tempMoves.filter(m => m.take);
-
-        if (whitePieces.find(p => p.location === position)) continue;
-        if (tpmTakes.length < 1) {
-          otherKingSpaces.splice(otherKingSpaces.findIndex(v => v[0] === cur[0] && v[1] === cur[1]), 1)[0];
-          canMove.push(posToCords(position));
-        }
-      }
-
-      const a = whiteLocAsCords[1];
-      const b = whiteLocAsCords[0];
-
-      return {
-        canMove: canMove.map(v => [v[1], 8 - v[0]]) as [number, number][],
-        cantMove: otherKingSpaces.map(
-          (v) => [v[0] + a, 8 - Math.abs(v[1] + b)].includes(0) 
-          ? null 
-          : [v[0] + a, 8 - Math.abs(v[1] + b)]
-        ).filter(
-          v => v !== null
-        ) as [number, number][],
-        inCheck,
-      }
-
-    }
-
-  }
-
-  private checkBlackCheck() {
-
-    const blackKing = clone(this.piece === "k" ? this : this.otherPieces.find(v => v.type === "k") as Piece);
-
-  }
 }
