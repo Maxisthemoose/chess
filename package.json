@@ -1,0 +1,28 @@
+{
+  "name": "chess-shenanies",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "ts-node src/index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/clone": "^2.1.1",
+    "@types/keypress": "^2.0.30",
+    "@types/readline-sync": "^1.4.4",
+    "chalk": "^4.1.2",
+    "clone": "^2.1.2",
+    "keypress": "^0.2.1",
+    "readline-sync": "^1.4.10"
+  },
+  "devDependencies": {
+    "@types/chalk": "^2.2.0",
+    "@types/node": "^16.11.6",
+    "ts-node": "^10.4.0",
+    "tslib": "^2.3.1",
+    "typescript": "^4.4.4"
+  }
+}
